@@ -37,7 +37,10 @@ function createPlayer(name,mark) {
     return {name,mark}
 }
 
-function getComputerChoice(array){
+function getComputerChoice(array,computerObj,playerObj){
+    let evaluation = evaluateBoard(array,computerObj,playerObj);
+
+    
     let emptyCellIndexes=[];
     for(i=0; i < array.length; i++) {
         if(array[i].content == "") {
@@ -46,18 +49,62 @@ function getComputerChoice(array){
     }
     //pick random value from emptyCellIndexes
     const randomIndex = emptyCellIndexes[Math.floor(Math.random() * emptyCellIndexes.length)];
-    console.log(randomIndex);
+    console.log("Random index: " + randomIndex);
+
+    if((evaluation == false) && (randomIndex != undefined)) {
+        //mark div and change corresponding object at randomIndex
+        array[randomIndex].content = computerObj.mark;
+        const divId = "#" + array[randomIndex].cellId;
+        console.log(divId);
+        document.querySelector(divId).textContent = computerObj.mark;
+    } else if ((evaluation == false) && (randomIndex == undefined)) {
+        alert("It's a tie!");
+    } else if (evaluation == true) {
+        
+    } 
+
+    
+
     
 }
 
 
+function evaluateBoard (objectArray,player1obj, player2obj) {
+    //evaluate first row
+    let firstRow = ((objectArray[0].content == objectArray[1].content) && 
+        (objectArray[0].content == objectArray[2].content) && objectArray[0].content != "");
+    
+    let secondRow = ((objectArray[3].content == objectArray[4].content) && 
+        (objectArray[3].content == objectArray[5].content) && objectArray[3].content != "");
 
+    let thirdRow = ((objectArray[6].content == objectArray[7].content) && 
+        (objectArray[6].content == objectArray[8].content) && objectArray[6].content != "");
+
+    let accross = ((objectArray[0].content == objectArray[4].content) && 
+    (objectArray[6].content == objectArray[8].content) && objectArray[0].content != "");
+
+    let firstColumn = ((objectArray[0].content == objectArray[3].content) && 
+        (objectArray[0].content == objectArray[6].content) && objectArray[0].content != "");
+    
+    let secondColumn = ((objectArray[1].content == objectArray[4].content) && 
+        (objectArray[1].content == objectArray[7].content) && objectArray[1].content != "");
+
+    let thirdColumn = ((objectArray[2].content == objectArray[5].content) && 
+        (objectArray[2].content == objectArray[8].content) && objectArray[2].content != "");
+
+
+    let result = firstRow || secondRow || thirdRow || firstColumn || secondColumn || thirdColumn || accross;
+    
+   return result;
+} 
 
 
 
 
 
 function game(){
+    const computer = createPlayer("Computer","O");
+    const player = createPlayer("Csaba", "X");
     let board =[];
     showBoard(3,3,board);
     const divs = document.querySelectorAll(".cell");
@@ -65,16 +112,16 @@ function game(){
     for(i=0; i < divs.length; i++) {
         if (divs[i].textContent == "") {
             divs[i].addEventListener("click", (e)=> {
-                e.target.textContent = "X";
+                e.target.textContent = player.mark;
                 let id = e.target.id;
                 console.log(id);
                 for (let i=0; i < board.length; i++) {
                     if(board[i].cellId == id) {
-                        board[i].content = "X";
+                        board[i].content = player.mark;
                     }
                 }
                 console.log(board);
-                getComputerChoice(board);
+                getComputerChoice(board,computer,player);
             })
         }
     }
