@@ -34,7 +34,9 @@ function createPlayer(name,mark) {
     return {name,mark}
 }
 
-function getComputerChoice(array,computerObj){
+function getComputerChoice(array,computerObj,playerObj){
+        let pNameContainer = document.querySelector("#name1");
+        let cNameContainer = document.querySelector("#name2");
         let emptyCellIndexes=[];
         for(i=0; i < array.length; i++) {
             if(array[i].content == "") {
@@ -45,13 +47,24 @@ function getComputerChoice(array,computerObj){
         const randomIndex = emptyCellIndexes[Math.floor(Math.random() * emptyCellIndexes.length)];
         
         if(randomIndex == undefined) {
+            cNameContainer.classList.remove("active");
             return false;
         } else {
              //mark div and change corresponding object at randomIndex
-        array[randomIndex].content = computerObj.mark;
-        const divId = "#" + array[randomIndex].cellId;
+             setTimeout(() => {
+                array[randomIndex].content = computerObj.mark;
+                const divId = "#" + array[randomIndex].cellId;
+                
+                document.querySelector(divId).textContent = computerObj.mark;
+                let valuation = evaluateBoard(array);
+                cNameContainer.classList.remove("active");
+                pNameContainer.classList.add("active");
+                finish(valuation, array,playerObj,computerObj)
+                
+                
+
+              }, 1000);
         
-        document.querySelector(divId).textContent = computerObj.mark;
         
         }
      
@@ -95,6 +108,8 @@ function evaluateBoard(board) {
     let accross = evaluateLine(board[0],board[4],board[8]);
     let accross2 = evaluateLine(board[2], board[4], board[6]);
     let result;
+    
+    
     let emptys= [];
     for (i=0; i < board.length; i++) {
         if(board[i].content == "") {
@@ -105,6 +120,7 @@ function evaluateBoard(board) {
     for(i = 0; i < arr.length;i++) {
         if(arr[i] != "") {
             result = arr[i];
+           
             for(j=0; j < emptys.length; j++) {
                 let divId = "#" + emptys[j].cellId
                 let div = document.querySelector(divId);
@@ -140,6 +156,8 @@ function newGame(message){
 }
 
 function finish(valuation, array,playerObj,computerObj){
+    //animated container
+    const animatedDiv = document.querySelector(".active");
     let emptycellsLeft=0;
     let message;
     for(i =0; i < array.length; i++) {
@@ -153,9 +171,18 @@ function finish(valuation, array,playerObj,computerObj){
     if(finishedWon == true) {
         let matchPlayer = (valuation == playerObj.mark) ? playerObj.name : "Computer";
         message = matchPlayer + " has won the game!";
+        
+        //stop animation
+        if(animatedDiv){
+            animatedDiv.classList.remove("active");
+        };
         newGame(message);
     } else if(finishedTie == true) {
         message = "It's a tie";
+        //stop animation
+        if(animatedDiv){
+            animatedDiv.classList.remove("active");
+        };
         newGame(message);
     } else return false;
 
@@ -163,7 +190,12 @@ function finish(valuation, array,playerObj,computerObj){
 }
 
 
+
+
 function game(playerName, playerMark, computerMark){
+    let pNameContainer = document.querySelector("#name1");
+    let cNameContainer = document.querySelector("#name2");
+    pNameContainer.classList.add("active");
     const container = document.querySelector(".container");
     container.innerHTML = "";
     let newDiv = document.querySelector(".new");
@@ -195,7 +227,9 @@ function game(playerName, playerMark, computerMark){
                     let valuation; 
                     valuation = evaluateBoard(board);
                     if (valuation == undefined) {
-                        getComputerChoice(board,computer);
+                        pNameContainer.classList.remove("active");
+                        cNameContainer.classList.add("active");
+                        getComputerChoice(board,computer,player);
                         valuation= evaluateBoard(board);
                         finish(valuation,board,player,computer);
                     } else {
@@ -234,7 +268,8 @@ startButton.addEventListener("click", ()=> {
             playerName = document.querySelector("#name").value;
             playerMark = document.querySelector("#mark1").value;
             computerMark = document.querySelector("#mark2").value;
-            const text = document.querySelector("#text");
+            const pNameContainer = document.querySelector("#name1");
+            const cNameContainer = document.querySelector("#name2");
             
             const welcomeDiv = document.querySelector(".welcome");
             
@@ -248,7 +283,9 @@ startButton.addEventListener("click", ()=> {
                     playerMark = playerMark.toUpperCase();
                     computerMark = computerMark.toUpperCase();
                     welcomeDiv.style.display = "none";
-                    text.textContent = `${playerName}(${playerMark})   VS    Computer(${computerMark}) `;
+                    pNameContainer.textContent = `${playerName}(${playerMark})`;
+                    cNameContainer.textContent =  `Computer(${computerMark})`;
+                    
                     game(playerName,playerMark,computerMark);
                     break;    
             }
